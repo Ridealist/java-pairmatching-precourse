@@ -8,6 +8,7 @@ import camp.nextstep.edu.missionutils.test.NsTest;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import pairmatching.Application;
+import pairmatching.domain.pair.Pairs;
 
 class ApplicationTest extends NsTest {
 
@@ -21,6 +22,18 @@ class ApplicationTest extends NsTest {
                 assertThat(output()).contains("태웅 : 백호", "치수 : 태섭");
             },
             Arrays.asList("태웅", "백호", "치수", "태섭")
+        );
+    }
+
+    @Test
+    void 홀수_인원_페어_매칭() {
+        assertShuffleTest(
+                () -> {
+                    Pairs.clear();
+                    run("1", "백엔드, 레벨1, 자동차경주", "Q");
+                    assertThat(output()).contains("태웅 : 백호", "치수 : 태섭 : 승호");
+                },
+                Arrays.asList("태웅", "백호", "치수", "태섭", "승호")
         );
     }
 
