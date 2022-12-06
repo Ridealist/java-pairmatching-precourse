@@ -8,11 +8,10 @@ import pairmatching.domain.pair.PairsRepository;
 public class PairsValidator {
     private static final String NO_MATCHING_HISTORY_ERROR_MESSAGE = "매칭 이력이 없습니다.";
 
-    public static void validateMatchingHistory(Course course, Level level, Mission mission)
+    public static void validateMatchingHistory(Course course, Level level, Mission mission, PairsRepository pairsRepository)
             throws IllegalArgumentException {
-        if (!PairsRepository.contains(course, level, mission)) {
+        if (pairsRepository.find(course, level, mission) == null) {
             throw new IllegalArgumentException(NO_MATCHING_HISTORY_ERROR_MESSAGE);
         }
     }
-
 }
