@@ -7,29 +7,22 @@ import pairmatching.domain.level.Level;
 import pairmatching.domain.mission.Mission;
 
 public class PairsRepository {
-    private static final List<Pairs> pairs = new ArrayList<>();
+    private final List<PairGroup> pairs = new ArrayList<>();
 
-    public static boolean contains(Course course, Level level, Mission mission) {
-        return pairs.stream()
-                .filter(pairs -> pairs.getCourse().equals(course))
-                .filter(pairs -> pairs.getLevel().equals(level))
-                .anyMatch(pairs -> pairs.getMission().equals(mission));
+    public void create(Course course, Level level, Mission mission, Pair pair) {
+        pairs.add(new PairGroup(course, level, mission, pair));
     }
 
-    public static void create(Pairs pairs) {
-        PairsRepository.pairs.add(pairs);
-    }
-
-    public static Pairs find(Course course, Level level, Mission mission) {
+    public PairGroup find(Course course, Level level, Mission mission) {
         return pairs.stream()
-                .filter(pairs -> pairs.getCourse().equals(course))
-                .filter(pairs -> pairs.getLevel().equals(level))
-                .filter(pairs -> pairs.getMission().equals(mission))
+                .filter(pairGroup -> pairGroup.getCourse().equals(course))
+                .filter(pairGroup -> pairGroup.getLevel().equals(level))
+                .filter(pairGroup -> pairGroup.getMission().equals(mission))
                 .findFirst()
                 .orElse(null);
     }
 
-    public static void clear() {
+    public void clear() {
         pairs.clear();
     }
 }

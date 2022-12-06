@@ -1,6 +1,6 @@
 package pairmatching.domain.map;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +14,8 @@ public class PairMap {
 
     private final Course course;
     private final Level level;
-    private Map<String, Set<String>> pairMap;
+
+    private final Map<String, Set<String>> pairMap;
 
     public PairMap(Course course, Level level, CrewRepository crewRepository) {
         this.course = course;
@@ -26,13 +27,13 @@ public class PairMap {
         Map<String, Set<String>> pairMap = new HashMap<>();
         List<String> crewNames = crewRepository.getCrewNamesByCourse(course);
         for (String name : crewNames) {
-            Set<String> pairedCrews = new HashSet<>();
-            pairMap.put(name, pairedCrews);
+            Set<String> emptyPairedCrews = new HashSet<>();
+            pairMap.put(name, emptyPairedCrews);
         }
         return pairMap;
     }
 
-    public boolean hasPaired(List<List<String>> pairCrews) {
+    public boolean hasPairAtLeastOnce(List<List<String>> pairCrews) {
         for (List<String> pairs : pairCrews) {
             if (hasPairedEachCrews(pairs)) {
                 return true;
@@ -42,7 +43,8 @@ public class PairMap {
     }
 
     private boolean hasPairedEachCrews(List<String> crewNames) {
-        while (crewNames.size() > 0) {
+        crewNames = new ArrayList<>(crewNames);
+        while (crewNames.size() > 1) {
             String name = crewNames.remove(0);
             if (hasPairedOneAnother(name, crewNames)) {
                 return true;
@@ -67,15 +69,20 @@ public class PairMap {
     }
 
     private void mappingPairs(List<String> crews) {
-        for (int i = 0; i < crews.size() - 1; i++) {
-            for (int j = i + 1; j < crews.size(); j++) {
-                pairMap.get(crews.get(i)).add(crews.get(j));
-                pairMap.get(crews.get(j)).add(crews.get(i));
+        for (int firstIdx = 0; firstIdx < crews.size() - 1; firstIdx++) {
+            for (int secondIdx = firstIdx + 1; secondIdx < crews.size(); secondIdx++) {
+                Set<String> emptyPairedCrews = new HashSet<>();
+                pairMap.getOrDefault(crews.get(firstIdx), emptyPairedCrews).add(crews.get(secondIdx));
+                pairMap.getOrDefault(crews.get(secondIdx), emptyPairedCrews).add(crews.get(firstIdx));
             }
         }
     }
 
-    public Map<String, Set<String>> getPairMap() {
-        return Collections.unmodifiableMap(this.pairMap);
+    public Course getCourse() {
+        return course;
+    }
+
+    public Level getLevel() {
+        return level;
     }
 }
