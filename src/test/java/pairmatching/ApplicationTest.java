@@ -7,8 +7,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import camp.nextstep.edu.missionutils.test.NsTest;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import pairmatching.Application;
-import pairmatching.domain.pair.Pairs;
 
 class ApplicationTest extends NsTest {
 
@@ -29,11 +27,10 @@ class ApplicationTest extends NsTest {
     void 홀수_인원_페어_매칭() {
         assertShuffleTest(
                 () -> {
-                    Pairs.clear();
-                    run("1", "백엔드, 레벨1, 자동차경주", "Q");
-                    assertThat(output()).contains("태웅 : 백호", "치수 : 태섭 : 승호");
+                    run("1", "백엔드, 레벨1, 로또", "Q");
+                    assertThat(output()).contains("태웅 : 백호", "치수 : 태섭 : 달재");
                 },
-                Arrays.asList("태웅", "백호", "치수", "태섭", "승호")
+                Arrays.asList("태웅", "백호", "치수", "태섭", "달재")
         );
     }
 
@@ -44,6 +41,16 @@ class ApplicationTest extends NsTest {
                 runException("1", "백엔드, 레벨1, 오징어게임");
                 assertThat(output()).contains(ERROR_MESSAGE);
             }
+        );
+    }
+
+    @Test
+    void 없는_단계에_대한_예외_처리() {
+        assertSimpleTest(
+                () -> {
+                    runException("1", "백엔드, 레벨8, 오징어게임");
+                    assertThat(output()).contains(ERROR_MESSAGE);
+                }
         );
     }
 
