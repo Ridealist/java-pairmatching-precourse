@@ -1,7 +1,7 @@
 package pairmatching.view;
 
 import java.util.List;
-import pairmatching.domain.pair.Pairs;
+import pairmatching.domain.pair.Pair;
 
 public class OutputView {
 
@@ -59,10 +59,10 @@ public class OutputView {
         System.out.println(INIT_MESSAGE);
     }
 
-    public static void printResult(Pairs pairs) {
+    public static void printResult(Pair pair) {
         System.out.println();
         System.out.println(RESULT_MESSAGE);
-        List<List<String>> pairCrews = pairs.getPair();
+        List<List<String>> pairCrews = pair.getPairNames();
         for (List<String> pairUnit : pairCrews) {
             System.out.println(String.join(DELIMITER, pairUnit));
         }
