@@ -5,8 +5,11 @@ import java.util.function.Supplier;
 import pairmatching.domain.course.Course;
 import pairmatching.domain.crew.CrewRepository;
 import pairmatching.domain.level.Level;
+import pairmatching.domain.map.PairMap;
+import pairmatching.domain.map.PairMapRepository;
 import pairmatching.domain.mission.Mission;
-import pairmatching.domain.pair.Pairs;
+import pairmatching.domain.pair.Pair;
+import pairmatching.domain.pair.PairGroup;
 import pairmatching.domain.pair.PairsRepository;
 import pairmatching.utils.FileHandler;
 import pairmatching.validator.PairsValidator;
@@ -14,15 +17,12 @@ import pairmatching.view.InputView;
 import pairmatching.view.OutputView;
 
 public class MatchingController {
-    private static final int COURSE_INDEX = 0;
-    private static final int LEVEL_INDEX = 1;
-    private static final int MISSION_INDEX = 2;
-    private static final String REMATCHING_CHOICE = "네";
-
     private final CrewRepository crewRepository = new CrewRepository();
+    private final PairMapRepository pairMapRepository = new PairMapRepository();
+    private final PairsRepository pairsRepository = new PairsRepository();
 
     public MatchingController() {
-        setUp();
+        loadCrewData();
     }
 
     public String run() {
@@ -30,76 +30,71 @@ public class MatchingController {
         return repeatRequest(InputView::readMenuChoice);
     }
 
-    private void setUp() {
+    private void loadCrewData() {
         List<String> backendCrewNames = FileHandler.readCrewNames(Course.BACKEND);
         backendCrewNames.forEach(name -> crewRepository.save(Course.BACKEND, name));
         List<String> frontendCrewNames = FileHandler.readCrewNames(Course.FRONTEND);
         frontendCrewNames.forEach(name -> crewRepository.save(Course.FRONTEND, name));
     }
 
-    public void setupPairMatching() {
+    public void executePairMatching() {
         OutputView.printChoice();
         List<String> query = repeatRequest(InputView::readPairMatchingChoice);
-
-        Course course = Course.getValueOf(query.get(COURSE_INDEX));
-        Level level = Level.getValueOf(query.get(LEVEL_INDEX));
-        Mission mission = Mission.getValueOf(query.get(MISSION_INDEX));
-
-        Pairs pairs = new Pairs(course, level, mission);
-
-        if (PairsRepository.contains(course, level, mission)) {
-            OutputView.printRematchOrNot();
-            String input = repeatRequest(InputView::readReMatchingOrNot);
-            if (input.equals(REMATCHING_CHOICE)) {
-                pairMatching(pairs);
-            }
+        Course course = Course.getValueOf(query.get(SystemConstant.COURSE_INDEX));
+        Level level = Level.getValueOf(query.get(SystemConstant.LEVEL_INDEX));
+        Mission mission = Mission.getValueOf(query.get(SystemConstant.MISSION_INDEX));
+        if (stopPairMatching(course, level, mission)) {
             return;
         }
-        pairMatching(pairs);
+        pairMatching(course, level, mission);
     }
 
-    public void pairMatching(Pairs pairs) {
-        int count = 0;
-        while (count < 3) {
-            List<List<String>> pairedCrews = pairs.makePair(crewRepository);
-            if (!pairs.hasPairAtLeastOnce(crewRepository, pairedCrews)) {
-                break;
-            }
-            count++;
+    public boolean stopPairMatching(Course course, Level level, Mission mission) {
+        if (pairsRepository.find(course, level, mission) != null) {
+            OutputView.printRematchOrNot();
+            String input = repeatRequest(InputView::readReMatchingOrNot);
+            return input.equals(SystemConstant.QUIT_REMATCHING_CHOICE);
         }
+        return false;
+    }
 
-        if (count == 3) {
-            throw new IllegalStateException("페어 매칭이 불가능합니다.");
+    public void pairMatching(Course course, Level level, Mission mission) {
+        PairMap pairMap = loadPairMap(course, level);
+        Pair pair = new Pair(crewRepository, pairMap, course);
+        pairsRepository.create(course, level, mission, pair);
+        pairMap.updateMap(pair.getPairNames());
+        OutputView.printResult(pair);
+    }
+
+    private PairMap loadPairMap(Course course, Level level) {
+        if (pairMapRepository.find(course, level) == null) {
+            PairMap pairMap = new PairMap(course, level, crewRepository);
+            pairMapRepository.save(pairMap);
+            return pairMap;
         }
-
-        pairs.save(crewRepository);
-        PairsRepository.create(pairs);
-
-        OutputView.printResult(pairs);
+        return pairMapRepository.find(course, level);
     }
 
     public void searchPairMatching() {
         OutputView.printChoice();
         List<String> query = repeatRequest(InputView::readPairMatchingChoice);
-
-        Course course = Course.getValueOf(query.get(COURSE_INDEX));
-        Level level = Level.getValueOf(query.get(LEVEL_INDEX));
-        Mission mission = Mission.getValueOf(query.get(MISSION_INDEX));
-
+        Course course = Course.getValueOf(query.get(SystemConstant.COURSE_INDEX));
+        Level level = Level.getValueOf(query.get(SystemConstant.LEVEL_INDEX));
+        Mission mission = Mission.getValueOf(query.get(SystemConstant.MISSION_INDEX));
         hasMatchingHistory(course, level, mission);
     }
 
     private void hasMatchingHistory(Course course, Level level, Mission mission) {
         try {
-            PairsValidator.validateMatchingHistory(course, level, mission);
-            OutputView.printResult(PairsRepository.find(course, level, mission));
+            PairsValidator.validateMatchingHistory(course, level, mission, pairsRepository);
+            OutputView.printResult(pairsRepository.find(course, level, mission).getPair());
         } catch (IllegalArgumentException e) {
             OutputView.printError(e.getMessage());
         }
     }
 
     public void initPairMatching() {
-        PairsRepository.clear();
+        pairsRepository.clear();
         OutputView.printInit();
     }
 
