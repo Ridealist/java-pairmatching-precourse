@@ -3,6 +3,7 @@ package pairmatching.utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import pairmatching.domain.course.Course;
@@ -22,11 +23,10 @@ public class FileHandler {
     private static Scanner readFile(Course course) {
         try {
             File file = new File("./src/main/resources/" + course.getFileName() + ".md");
-            Scanner scanner = new Scanner(file);
-            return scanner;
+            return new Scanner(file);
         } catch (FileNotFoundException e) {
-            System.out.println(e.getStackTrace());
-            return null;
+            System.out.println(Arrays.toString(e.getStackTrace()));
+            return new Scanner(".");
         }
     }
 }

@@ -3,7 +3,7 @@ package pairmatching.controller;
 import java.util.List;
 import java.util.function.Supplier;
 import pairmatching.domain.course.Course;
-import pairmatching.domain.crew.Crews;
+import pairmatching.repository.Crews;
 import pairmatching.domain.level.Level;
 import pairmatching.domain.mission.Mission;
 import pairmatching.domain.pair.Pair;
