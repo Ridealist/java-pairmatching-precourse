@@ -21,27 +21,44 @@ public class MenuController {
         }
     }
 
-    private MatchingController matchingController = new MatchingController();
+    private final MatchingController matchingController = new MatchingController();
+    private boolean isApplicationRun = true;
 
     public void run() {
-        while (true) {
+        do {
             String choice = matchingController.run();
-            if (choice.equals(Command.PAIR_MATCHING.toString())) {
-                try {
-                    matchingController.setupPairMatching();
-                } catch (IllegalStateException e) {
-                    OutputView.printError(e.getMessage());
-                }
+            runPairMatching(choice);
+            searchPairMatching(choice);
+            initPairMatching(choice);
+            quitPairMatching(choice);
+        } while (isApplicationRun);
+    }
+
+    private void runPairMatching(String choice) {
+        if (choice.equals(Command.PAIR_MATCHING.toString())) {
+            try {
+                matchingController.executePairMatching();
+            } catch (IllegalStateException e) {
+                OutputView.printError(e.getMessage());
             }
-            if (choice.equals(Command.PAIR_SEARCHING.toString())) {
-                matchingController.searchPairMatching();
-            }
-            if (choice.equals(Command.PAIR_INITIATE.toString())) {
-                matchingController.initPairMatching();
-            }
-            if (choice.equals(Command.QUIT_APPLICATION.toString())) {
-                break;
-            }
+        }
+    }
+
+    private void searchPairMatching(String choice) {
+        if (choice.equals(Command.PAIR_SEARCHING.toString())) {
+            matchingController.searchPairMatching();
+        }
+    }
+
+    private void initPairMatching(String choice) {
+        if (choice.equals(Command.PAIR_INITIATE.toString())) {
+            matchingController.initPairMatching();
+        }
+    }
+
+    private void quitPairMatching(String choice) {
+        if (choice.equals(Command.QUIT_APPLICATION.toString())) {
+            isApplicationRun = false;
         }
     }
 }
