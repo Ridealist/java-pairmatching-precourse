@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import pairmatching.domain.course.Course;
-import pairmatching.domain.crew.Crew;
 
 public class CrewRepository {
 

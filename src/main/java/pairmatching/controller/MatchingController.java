@@ -6,8 +6,8 @@ import pairmatching.domain.course.Course;
 import pairmatching.domain.crew.CrewRepository;
 import pairmatching.domain.level.Level;
 import pairmatching.domain.mission.Mission;
-import pairmatching.domain.pair.Pair;
 import pairmatching.domain.pair.Pairs;
+import pairmatching.domain.pair.PairsRepository;
 import pairmatching.utils.FileHandler;
 import pairmatching.validator.PairsValidator;
 import pairmatching.view.InputView;
@@ -45,24 +45,24 @@ public class MatchingController {
         Level level = Level.getValueOf(query.get(LEVEL_INDEX));
         Mission mission = Mission.getValueOf(query.get(MISSION_INDEX));
 
-        Pair pair = new Pair(course, level, mission);
+        Pairs pairs = new Pairs(course, level, mission);
 
-        if (Pairs.contains(course, level, mission)) {
+        if (PairsRepository.contains(course, level, mission)) {
             OutputView.printRematchOrNot();
             String input = repeatRequest(InputView::readReMatchingOrNot);
             if (input.equals(REMATCHING_CHOICE)) {
-                pairMatching(pair);
+                pairMatching(pairs);
             }
             return;
         }
-        pairMatching(pair);
+        pairMatching(pairs);
     }
 
-    public void pairMatching(Pair pair) {
+    public void pairMatching(Pairs pairs) {
         int count = 0;
         while (count < 3) {
-            List<List<String>> pairedCrews = pair.makePair(crewRepository);
-            if (!pair.hasPairAtLeastOnce(crewRepository, pairedCrews)) {
+            List<List<String>> pairedCrews = pairs.makePair(crewRepository);
+            if (!pairs.hasPairAtLeastOnce(crewRepository, pairedCrews)) {
                 break;
             }
             count++;
@@ -72,10 +72,10 @@ public class MatchingController {
             throw new IllegalStateException("페어 매칭이 불가능합니다.");
         }
 
-        pair.save(crewRepository);
-        Pairs.create(pair);
+        pairs.save(crewRepository);
+        PairsRepository.create(pairs);
 
-        OutputView.printResult(pair);
+        OutputView.printResult(pairs);
     }
 
     public void searchPairMatching() {
@@ -92,14 +92,14 @@ public class MatchingController {
     private void hasMatchingHistory(Course course, Level level, Mission mission) {
         try {
             PairsValidator.validateMatchingHistory(course, level, mission);
-            OutputView.printResult(Pairs.find(course, level, mission));
+            OutputView.printResult(PairsRepository.find(course, level, mission));
         } catch (IllegalArgumentException e) {
             OutputView.printError(e.getMessage());
         }
     }
 
     public void initPairMatching() {
-        Pairs.clear();
+        PairsRepository.clear();
         OutputView.printInit();
     }
 
