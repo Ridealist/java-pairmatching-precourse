@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import pairmatching.domain.course.Course;
 import pairmatching.domain.crew.Crew;
-import pairmatching.repository.Crews;
+import pairmatching.domain.crew.CrewRepository;
 import pairmatching.domain.level.Level;
 import pairmatching.domain.mission.Mission;
 
@@ -25,8 +25,8 @@ public class Pair {
         this.mission = mission;
     }
 
-    public List<List<String>> makePair(Crews crews) {
-        List<String> shuffledCrews = Randoms.shuffle(crews.getCrewNamesByCourse(course));
+    public List<List<String>> makePair(CrewRepository crewRepository) {
+        List<String> shuffledCrews = Randoms.shuffle(crewRepository.getCrewNamesByCourse(course));
         List<List<String>> pairCrews = new ArrayList<>();
         addSubList(shuffledCrews, pairCrews);
         return pairCrews;
@@ -43,9 +43,9 @@ public class Pair {
         }
     }
 
-    public boolean hasPairAtLeastOnce(Crews crews, List<List<String>> pairs) {
+    public boolean hasPairAtLeastOnce(CrewRepository crewRepository, List<List<String>> pairs) {
         for (List<String> pair : pairs) {
-            List<Crew> pairedCrew = mapNameToCrew(crews, pair);
+            List<Crew> pairedCrew = mapNameToCrew(crewRepository, pair);
             if (hasPairedEachCrews(pairedCrew)) {
                 return true;
             }
@@ -53,9 +53,9 @@ public class Pair {
         return false;
     }
 
-    private List<Crew> mapNameToCrew(Crews crews, List<String> names) {
+    private List<Crew> mapNameToCrew(CrewRepository crewRepository, List<String> names) {
         return Arrays.stream(names.toArray())
-                .map(name -> crews.getCrewByName((String) name))
+                .map(name -> crewRepository.getCrewByName((String) name))
                 .collect(Collectors.toList());
     }
 
@@ -78,8 +78,8 @@ public class Pair {
         return false;
     }
 
-    public void save(Crews crews) {
-        pair = makePair(crews);
+    public void save(CrewRepository crewRepository) {
+        pair = makePair(crewRepository);
     }
 
     public List<List<String>> getPair() {

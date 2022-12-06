@@ -1,4 +1,4 @@
-package pairmatching.repository;
+package pairmatching.domain.crew;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import pairmatching.domain.course.Course;
 import pairmatching.domain.crew.Crew;
 
-public class Crews {
+public class CrewRepository {
 
     private final List<Crew> crews = new ArrayList<>();
 

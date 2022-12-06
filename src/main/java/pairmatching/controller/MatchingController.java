@@ -3,7 +3,7 @@ package pairmatching.controller;
 import java.util.List;
 import java.util.function.Supplier;
 import pairmatching.domain.course.Course;
-import pairmatching.repository.Crews;
+import pairmatching.domain.crew.CrewRepository;
 import pairmatching.domain.level.Level;
 import pairmatching.domain.mission.Mission;
 import pairmatching.domain.pair.Pair;
@@ -19,7 +19,7 @@ public class MatchingController {
     private static final int MISSION_INDEX = 2;
     private static final String REMATCHING_CHOICE = "네";
 
-    private final Crews crews = new Crews();
+    private final CrewRepository crewRepository = new CrewRepository();
 
     public MatchingController() {
         setUp();
@@ -32,9 +32,9 @@ public class MatchingController {
 
     private void setUp() {
         List<String> backendCrewNames = FileHandler.readCrewNames(Course.BACKEND);
-        backendCrewNames.forEach(name -> crews.save(Course.BACKEND, name));
+        backendCrewNames.forEach(name -> crewRepository.save(Course.BACKEND, name));
         List<String> frontendCrewNames = FileHandler.readCrewNames(Course.FRONTEND);
-        frontendCrewNames.forEach(name -> crews.save(Course.FRONTEND, name));
+        frontendCrewNames.forEach(name -> crewRepository.save(Course.FRONTEND, name));
     }
 
     public void setupPairMatching() {
@@ -61,8 +61,8 @@ public class MatchingController {
     public void pairMatching(Pair pair) {
         int count = 0;
         while (count < 3) {
-            List<List<String>> pairedCrews = pair.makePair(crews);
-            if (!pair.hasPairAtLeastOnce(crews, pairedCrews)) {
+            List<List<String>> pairedCrews = pair.makePair(crewRepository);
+            if (!pair.hasPairAtLeastOnce(crewRepository, pairedCrews)) {
                 break;
             }
             count++;
@@ -72,7 +72,7 @@ public class MatchingController {
             throw new IllegalStateException("페어 매칭이 불가능합니다.");
         }
 
-        pair.save(crews);
+        pair.save(crewRepository);
         Pairs.create(pair);
 
         OutputView.printResult(pair);
