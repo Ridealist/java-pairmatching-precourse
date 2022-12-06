@@ -13,19 +13,6 @@ public class CrewRepository {
         crews.add(new Crew(course, name));
     }
 
-    public List<Crew> getCrewsByCourse(Course course) {
-        return crews.stream()
-                .filter(x -> x.getCourse().equals(course))
-                .collect(Collectors.toList());
-    }
-
-    public Crew getCrewByName(String name) {
-        return crews.stream()
-                .filter(x -> x.getName().equals(name))
-                .findFirst()
-                .orElse(null);
-    }
-
     public List<String> getCrewNamesByCourse(Course course) {
         return crews.stream()
                 .filter(x -> x.getCourse().equals(course))
